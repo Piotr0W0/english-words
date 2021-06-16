@@ -16,7 +16,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 public class Test {
-    private static final String PATHNAME = "Vocabulary list_Straightforward_Exam B2.";
+    private static final String PATHNAME = "C:\\Users\\Piotr\\Desktop/Vocabulary list_Straightforward_Exam B2.";
     private static final Random RANDOM = new Random();
     private static final List<Map<String, String>> dictionary = new ArrayList<>();
 
@@ -26,6 +26,8 @@ public class Test {
     }
 
     private static void play() throws ParseException {
+
+
         int rand = 0;
         int attempts = 0;
         int points = 0;
@@ -34,8 +36,16 @@ public class Test {
         System.out.println("Choose page:");
         unit = new Scanner(System.in).nextInt();
         Object[] dict = dictionary.get(unit).keySet().toArray();
-        while (true) {
-            rand = RANDOM.nextInt(dict.length);
+
+        Set<Integer> generated = new LinkedHashSet<>();
+        while (generated.size() < dict.length) {
+            generated.add(RANDOM.nextInt(dict.length));
+        }
+        for (Integer integer : generated) {
+//        while (true) {
+//            rand = RANDOM.nextInt(dict.length);
+            // Without duplicates option
+            rand = integer;
             new Scanner(System.in).nextLine();
             for (int i = 0; i < 50; i++) System.out.println();
             System.out.println(dictionary.get(unit).values().toArray()[rand]);
@@ -148,7 +158,7 @@ public class Test {
     }
 
     private static void writeToFile(String info, Map<String, String> answers) {
-        try (BufferedWriter bf = new BufferedWriter(new FileWriter("incorrect_answers.txt"))) {
+        try (BufferedWriter bf = new BufferedWriter(new FileWriter("C:\\Users\\Piotr\\Desktop/incorrect_answers.txt"))) {
             bf.write(info);
             for (Map.Entry<String, String> entry : answers.entrySet()) {
                 bf.write(entry.getKey() + "\t:\t" + entry.getValue());
