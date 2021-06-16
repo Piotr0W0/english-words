@@ -10,53 +10,64 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Stream;
 
 public class Test {
     private static final String PATHNAME = "Vocabulary list_Straightforward_Exam B2.";
-    private static final List<Map<String, String>> DICTIONARY = new ArrayList<>();
     private static final Random RANDOM = new Random();
+    private static final List<Map<String, String>> dictionary = new ArrayList<>();
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, ParseException {
         getData();
         play();
     }
 
-    private static void play() throws IOException {
+    private static void play() throws ParseException {
         int rand = 0;
         int attempts = 0;
         int points = 0;
         int unit = 0;
         Map<String, String> answers = new LinkedHashMap();
-        System.out.println("Choose unit:");
+        System.out.println("Choose page:");
         unit = new Scanner(System.in).nextInt();
-        Object[] dict = DICTIONARY.get(unit).keySet().toArray();
+        Object[] dict = dictionary.get(unit).keySet().toArray();
         while (true) {
             rand = RANDOM.nextInt(dict.length);
-            System.out.println(DICTIONARY.get(unit).values().toArray()[rand]);
+            new Scanner(System.in).nextLine();
+            for (int i = 0; i < 50; i++) System.out.println();
+            System.out.println(dictionary.get(unit).values().toArray()[rand]);
             String answer = new Scanner(System.in).nextLine();
             if (answer.trim().equalsIgnoreCase("exit")) {
-                String info = "Your score:\t" + points + " / " + attempts + "\nAll incorrect answers:\n";
+                long diff = Math.abs(new SimpleDateFormat("HH:mm:ss dd.MM.yyyy").parse("09:50:00 30.06.2021").getTime() - new Date().getTime());
+                String info = "" + new SimpleDateFormat("HH:mm:ss dd.MM.yyyy").format(new Date()) +
+                        "\nTime left to Final Test:\n" +
+                        diff / (60 * 60 * 1000 * 24) + " days " + diff / (60 * 60 * 1000) % 24 + " hours " + diff / (60 * 1000) % 60 + " minutes " + diff / 1000 % 60 + " seconds\n" +
+                        "\nYour score:\t" + points + " / " + attempts + "\nAll incorrect answers:\n";
                 System.out.println(info);
                 answers.forEach((key, value) -> System.out.println(key + "\t-\t" + value));
-                writeToFile(info, answers);
+                writeToFile(info + "\n", answers);
                 return;
             }
             if (answer.trim().equalsIgnoreCase("change")) {
-                System.out.println("Change unit:");
+                System.out.println("Change page:");
                 unit = new Scanner(System.in).nextInt();
-                dict = DICTIONARY.get(unit).keySet().toArray();
+                dict = dictionary.get(unit).keySet().toArray();
             } else {
                 attempts++;
                 System.out.println(dict[rand]);
+                if (dict[rand].toString().replaceAll("\\s+", "").contains("’")) {
+                    answer = answer.replaceAll("'", "’");
+                }
                 if (answer.trim().equalsIgnoreCase(dict[rand].toString().trim()) ||
                         answer.replaceAll("\\s+", "").equalsIgnoreCase(dict[rand].toString().replaceAll("\\s+", ""))) {
                     points++;
-                    System.out.println("CORRECT\t+1\t" + points);
+                    System.out.print("CORRECT\t+1\t" + points + "\t" + attempts);
                 } else {
-                    answers.put(DICTIONARY.get(unit).values().toArray()[rand].toString(), dict[rand].toString());
-                    System.out.println("INCORRECT\t0\t" + points);
+                    answers.put(dictionary.get(unit).values().toArray()[rand].toString(), dict[rand].toString());
+                    System.out.print("INCORRECT\t0\t" + points + "\t" + attempts);
                 }
             }
         }
@@ -80,7 +91,7 @@ public class Test {
             if (s.matches(" \\d ")) {
                 tempIndex = Integer.parseInt(s.trim());
                 tempMap = new HashMap<>();
-                DICTIONARY.add(tempMap);
+                dictionary.add(tempMap);
             }
             if (Character.isDigit(s.charAt(0))) {
                 if (s.contains("villain złoczyńca")) {
@@ -111,7 +122,7 @@ public class Test {
                 }
                 try {
                     tempMap.put(parts[0].trim(), parts[1].trim());
-                    DICTIONARY.add(tempIndex, tempMap);
+                    dictionary.add(tempIndex, tempMap);
                 } catch (IndexOutOfBoundsException ignored) {
                     System.out.println(s);
                 }
@@ -137,7 +148,7 @@ public class Test {
     }
 
     private static void writeToFile(String info, Map<String, String> answers) {
-        try (BufferedWriter bf = new BufferedWriter(new FileWriter(new File("incorrect_answers.txt")))) {
+        try (BufferedWriter bf = new BufferedWriter(new FileWriter("incorrect_answers.txt"))) {
             bf.write(info);
             for (Map.Entry<String, String> entry : answers.entrySet()) {
                 bf.write(entry.getKey() + "\t:\t" + entry.getValue());
